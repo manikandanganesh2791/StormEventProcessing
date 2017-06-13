@@ -1,0 +1,275 @@
+select total_million_damage + total_thousand_damage as Property_Damage from 
+((select year, sum(damage_property) * 1000000 as total_million_damage from Event_Records where year = 1950 and damage_property like '%m') as A, 
+ (select sum(damage_property) * 1000 as total_thousand_damage from Event_Records where year = 1950 and damage_property like '%k') as B);
+
+select A.year, (sum(A.damage_property)*1000)+(sum(B.damage_property)*1000000) as Property_Damage
+from Event_Records A
+join Event_Records B
+on A.year = B.year
+where A.damage_property like '%k' and B.damage_property like '%m'
+group by year;
+
+select A.year, (sum(A.property_damage)*1000)+(sum(B.property_damage)*1000000) as Property_Damage
+from event_records_test A
+join event_records_test B
+on A.year = B.year
+where A.property_damage like '%k'
+group by year;
+
+drop table if exists damage_byyear;
+create table damage_byyear as (
+select Year,
+concat(sum(case
+when Damage_Property like '%K' then Damage_Property*1000
+when Damage_Property like '%M' then Damage_Property*1000000
+end)/1000000, 'M') as Total_Damage_Property
+from Event_Records
+group by year);
+
+SELECT * FROM damage_byyear
+INTO OUTFILE "/var/lib/mysql-files/damage_year.csv"
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n';
++------+-----------------------+
+| Year | Total_Damage_Property |
++------+-----------------------+
+| 1950 | 34.48165M             |
+| 1951 | 65.50599M             |
+| 1952 | 94.30224M             |
+| 1953 | 596.1047M             |
+| 1954 | 85.80532M             |
+| 1955 | 82.66063M             |
+| 1956 | 116.91235M            |
+| 1957 | 224.38889M            |
+| 1958 | 128.99461M            |
+| 1959 | 87.45304M             |
+| 1960 | 118.22424M            |
+| 1961 | 179.38873M            |
+| 1962 | 67.20073M             |
+| 1963 | 87.23058M             |
+| 1964 | 165.99082M            |
+| 1965 | 1762.46901M           |
+| 1966 | 476.62936M            |
+| 1967 | 577.01922M            |
+| 1968 | 210.07991M            |
+| 1969 | 113.27423M            |
+| 1970 | 625.20598M            |
+| 1971 | 202.12055M            |
+| 1972 | 151.17257M            |
+| 1973 | 2063.04156M           |
+| 1974 | 1941.01778M           |
+| 1975 | 826.72379M            |
+| 1976 | 308.49719M            |
+| 1977 | 342.02423M            |
+| 1978 | 616.06816M            |
+| 1979 | 946.24124M            |
+| 1980 | 2152.81435M           |
+| 1981 | 765.88831M            |
+| 1982 | 1429.193M             |
+| 1983 | 765.85559M            |
+| 1984 | 2131.17139M           |
+| 1985 | 1608.09721M           |
+| 1986 | 1034.91234M           |
+| 1987 | 407.83795M            |
+| 1988 | 1124.21465M           |
+| 1989 | 1760.05105M           |
+| 1990 | 1560.56807M           |
+| 1991 | 1152.29643M           |
+| 1992 | 1406.6889M            |
+| 1993 | 1605.51425M           |
+| 1994 | 1660.23125M           |
+| 1995 | 1748.6365M            |
+| 1996 | 3625.98415M           |
+| 1997 | 4410.75874M           |
+| 1998 | 11590.18393M          |
+| 1999 | 5720.83205M           |
+| 2000 | 4121.40484M           |
+| 2001 | 4996.79767M           |
+| 2002 | 4100.86225M           |
+| 2003 | 8214.50893M           |
+| 2004 | 9350.15574M           |
+| 2005 | 15743.85761M          |
+| 2006 | 7072.29889M           |
+| 2007 | 7357.27066M           |
+| 2008 | 16106.82072M          |
+| 2009 | 6773.37663M           |
+| 2010 | 6253.84169M           |
+| 2011 | 12815.22929M          |
+| 2012 | 11292.58641M          |
+| 2013 | 6817.38805M           |
+| 2014 | 4411.72039M           |
+| 2015 | 3446.67889M           |
+| 2016 | 10749.34873M          |
+| 2017 | 1476.76859M           |
++------+-----------------------+
+
+
+drop table if exists damage_bystate;
+create table damage_bystate as (
+select State,
+concat(sum(case
+when Damage_Property like '%K' then Damage_Property*1000
+when Damage_Property like '%M' then Damage_Property*1000000
+end)/1000000, 'M') as Total_Damage_Property
+from Event_Records
+group by State
+having State Not in (" "));
+
++----------------------+-----------------------+
+| State                | Total_Damage_Property |
++----------------------+-----------------------+
+| ALABAMA              | 5026.40592M           |
+| ALASKA               | 362.6155M             |
+| AMERICAN SAMOA       | 209.255M              |
+| ARIZONA              | 2037.41688M           |
+| ARKANSAS             | 5291.00777M           |
+| ATLANTIC NORTH       | 0.316M                |
+| ATLANTIC SOUTH       | 5.7069M               |
+| CALIFORNIA           | 7336.1549M            |
+| COLORADO             | 4968.90229M           |
+| CONNECTICUT          | 770.12472M            |
+| DELAWARE             | 158.19907M            |
+| DISTRICT OF COLUMBIA | 157.6981M             |
+| E PACIFIC            | 0.10201M              |
+| FLORIDA              | 12832.33646M          |
+| GEORGIA              | 5328.12966M           |
+| GUAM                 | 970.823M              |
+| GULF OF ALASKA       | 0.031M                |
+| GULF OF MEXICO       | 19.19214M             |
+| HAWAII               | 193.75726M            |
+| HAWAII WATERS        | 0M                    |
+| IDAHO                | 808.58511M            |
+| ILLINOIS             | 5419.95953M           |
+| INDIANA              | 4223.56389M           |
+| IOWA                 | 5746.94753M           |
+| KANSAS               | 5071.86666M           |
+| KENTUCKY             | 3101.85668M           |
+| LAKE ERIE            | 0.03M                 |
+| LAKE HURON           | 0M                    |
+| LAKE MICHIGAN        | 2.8078M               |
+| LAKE ONTARIO         | 0.075M                |
+| LAKE ST CLAIR        | 0.1M                  |
+| LAKE SUPERIOR        | 0.4M                  |
+| LOUISIANA            | 14701.44454M          |
+| MAINE                | 534.4196M             |
+| MARYLAND             | 1245.43769M           |
+| MASSACHUSETTS        | 1134.34161M           |
+| MICHIGAN             | 3518.14005M           |
+| MINNESOTA            | 4999.00406M           |
+| MISSISSIPPI          | 12096.61529M          |
+| MISSOURI             | 5688.55143M           |
+| MONTANA              | 316.751M              |
+| NEBRASKA             | 3883.74003M           |
+| NEVADA               | 396.42966M            |
+| NEW HAMPSHIRE        | 252.40283M            |
+| NEW JERSEY           | 6294.70848M           |
+| NEW MEXICO           | 841.38069M            |
+| NEW YORK             | 4853.0268M            |
+| NORTH CAROLINA       | 5371.16751M           |
+| NORTH DAKOTA         | 2065.92307M           |
+| OHIO                 | 7476.96674M           |
+| OKLAHOMA             | 6696.41582M           |
+| OREGON               | 739.43633M            |
+| PENNSYLVANIA         | 4561.05145M           |
+| PUERTO RICO          | 2221.58804M           |
+| RHODE ISLAND         | 129.7727M             |
+| SOUTH CAROLINA       | 1391.70181M           |
+| SOUTH DAKOTA         | 812.1215M             |
+| ST LAWRENCE R        | 0.015M                |
+| TENNESSEE            | 3147.17417M           |
+| TEXAS                | 25947.23355M          |
+| UTAH                 | 873.21447M            |
+| VERMONT              | 1523.3073M            |
+| VIRGIN ISLANDS       | 39.0909M              |
+| VIRGINIA             | 2185.27231M           |
+| WASHINGTON           | 1250.10327M           |
+| WEST VIRGINIA        | 1232.31972M           |
+| WISCONSIN            | 3345.71878M           |
+| WYOMING              | 248.52041M            |
++----------------------+-----------------------+
+
+select State, MAX(State_Count) AS Minimum_Storm_Occurance_Occurence
+from
+(select State, count(State) as State_Count
+from
+((select Year, State, Total_Damage_Property
+from
+(select Year, State,
+concat(sum(case
+when Damage_Property like '%K' then Damage_Property*1000
+when Damage_Property like '%M' then Damage_Property*1000000
+end)/1000000, 'M') as Total_Damage_Property
+from Event_Records
+where Year IN (2013, 2014, 2015, 2016, 2017)
+group by State, Year
+having State Not in (" ","HAWAII WATERS","LAKE HURON","ST LAWRENCE R","LAKE ERIE","GULF OF ALASKA","LAKE ONTARIO","LAKE ST CLAIR","E PACIFIC","ATLANTIC NORTH","LAKE SUPERIOR","LAKE MICHIGAN","ATLANTIC SOUTH","ALASKA","AMERICAN SAMOA")) A
+where Year = 2013
+group by State
+order by Total_Damage_Property
+LIMIT 10)
+UNION ALL
+(select Year, State, Total_Damage_Property
+from
+(select Year, State,
+concat(sum(case
+when Damage_Property like '%K' then Damage_Property*1000
+when Damage_Property like '%M' then Damage_Property*1000000
+end)/1000000, 'M') as Total_Damage_Property
+from Event_Records
+where Year IN (2013, 2014, 2015, 2016, 2017)
+group by State, Year
+having State Not in (" ","HAWAII WATERS","LAKE HURON","ST LAWRENCE R","LAKE ERIE","GULF OF ALASKA","LAKE ONTARIO","LAKE ST CLAIR","E PACIFIC","ATLANTIC NORTH","LAKE SUPERIOR","LAKE MICHIGAN","ATLANTIC SOUTH","ALASKA","AMERICAN SAMOA")) A
+where Year = 2014
+group by State
+order by Total_Damage_Property
+LIMIT 10)
+UNION ALL
+(select Year, State, Total_Damage_Property
+from
+(select Year, State,
+concat(sum(case
+when Damage_Property like '%K' then Damage_Property*1000
+when Damage_Property like '%M' then Damage_Property*1000000
+end)/1000000, 'M') as Total_Damage_Property
+from Event_Records
+where Year IN (2013, 2014, 2015, 2016, 2017)
+group by State, Year
+having State Not in (" ","HAWAII WATERS","LAKE HURON","ST LAWRENCE R","LAKE ERIE","GULF OF ALASKA","LAKE ONTARIO","LAKE ST CLAIR","E PACIFIC","ATLANTIC NORTH","LAKE SUPERIOR","LAKE MICHIGAN","ATLANTIC SOUTH","ALASKA","AMERICAN SAMOA")) A
+where Year = 2015
+group by State
+order by Total_Damage_Property
+LIMIT 10)
+UNION ALL
+(select Year, State, Total_Damage_Property
+from
+(select Year, State,
+concat(sum(case
+when Damage_Property like '%K' then Damage_Property*1000
+when Damage_Property like '%M' then Damage_Property*1000000
+end)/1000000, 'M') as Total_Damage_Property
+from Event_Records
+where Year IN (2013, 2014, 2015, 2016, 2017)
+group by State, Year
+having State Not in (" ","HAWAII WATERS","LAKE HURON","ST LAWRENCE R","LAKE ERIE","GULF OF ALASKA","LAKE ONTARIO","LAKE ST CLAIR","E PACIFIC","ATLANTIC NORTH","LAKE SUPERIOR","LAKE MICHIGAN","ATLANTIC SOUTH","ALASKA","AMERICAN SAMOA")) A
+where Year = 2016
+group by State
+order by Total_Damage_Property
+LIMIT 10)
+UNION ALL
+(select Year, State, Total_Damage_Property
+from
+(select Year, State,
+concat(sum(case
+when Damage_Property like '%K' then Damage_Property*1000
+when Damage_Property like '%M' then Damage_Property*1000000
+end)/1000000, 'M') as Total_Damage_Property
+from Event_Records
+where Year IN (2013, 2014, 2015, 2016, 2017)
+group by State, Year
+having State Not in (" ","HAWAII WATERS","LAKE HURON","ST LAWRENCE R","LAKE ERIE","GULF OF ALASKA","LAKE ONTARIO","LAKE ST CLAIR","E PACIFIC","ATLANTIC NORTH","LAKE SUPERIOR","LAKE MICHIGAN","ATLANTIC SOUTH","ALASKA","AMERICAN SAMOA")) A
+where Year = 2017
+group by State
+order by Total_Damage_Property
+LIMIT 10)) B
+group by State) C;
